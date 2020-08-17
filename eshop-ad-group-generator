@@ -1,0 +1,375 @@
+/** @OnlyCurrentDoc */
+/*
+Writen by Maume Fabian
+You can report bugs on Github : https://github.com/fmaume/Adword_eshop_adgroup_generator
+If you have question about use case you can contact me over linkedin: https://www.linkedin.com/in/fabian-maume-409b1830/?locale=en_US
+*/
+
+//main function to check numer of dimension and call the proper funciton
+function main_adword_script() {
+  //get all data range
+  var data = get_datas()
+  
+  // split out header and count the number of dimension
+  var header = data[0]
+  Logger.log(header)
+  var n_dimention = header.length
+  
+  Logger.log(n_dimention)
+
+  // call in function for this number of dimension
+ 
+  switch (n_dimention){
+    case 1:
+      one_dimention(data)
+      break
+    case 2:
+     two_dimention(data)
+     break
+    case 3:
+    three_dimention(data)
+     break 
+      
+  }
+
+  
+}
+
+
+function test() {
+  var sheets = SpreadsheetApp.getActiveSpreadsheet().getSheets()
+  Logger.log(sheets)
+  Logger.log(sheets[sheets.length -1])
+  // select new sheet
+  var import_sheet = sheets[sheets.length -1]
+  
+  N_line = get_line_count(import_sheet)
+  Logger.log(N_line)
+  
+}
+
+
+// function to get number of line with writer data
+function get_line_count(sheet) {
+var data = sheet.getDataRange().getValues();
+var N_line =  data.length 
+return N_line
+}
+
+
+// function to create new sheet with header
+function create_import_sheet() {
+  
+  // create new sheet
+  var spreadsheet = SpreadsheetApp.getActive()
+  spreadsheet.insertSheet(1);
+  // get all sheet
+  var sheets = SpreadsheetApp.getActiveSpreadsheet().getSheets()
+  Logger.log(sheets)
+  Logger.log(sheets[sheets.length -1])
+  // select new sheet
+  var import_sheet = sheets[sheets.length -1]
+  
+  
+  //create headers
+  import_sheet.getRange("A1").setValue('Campaign')
+  import_sheet.getRange("B1").setValue('Ad Group')
+  import_sheet.getRange("C1").setValue('Product Group')
+  import_sheet.getRange("D1").setValue('Max CPC')
+  import_sheet.getRange("E1").setValue('Product Group Type')
+  import_sheet.getRange("F1").setValue('Tracking template')
+  import_sheet.getRange("G1").setValue('Final URL suffix')
+  import_sheet.getRange("H1").setValue('Custom parameters')
+  import_sheet.getRange("I1").setValue('Campaign Status')
+  import_sheet.getRange("J1").setValue('Ad Group Status')
+  import_sheet.getRange("K1").setValue('Status')
+  import_sheet.getRange("L1").setValue('Comment')
+  
+  return import_sheet
+  
+}
+
+// function to get cells filled with data in current sheet
+function get_datas() {
+  var sheet = SpreadsheetApp.getActiveSheet();
+  var data = sheet.getDataRange().getValues();
+  return data
+  
+}
+
+
+
+
+
+//function to extract value from a given collumn
+function extract_collum(data, collum_number) {
+  target_variable = []
+  var i
+     for (i = 1; i < data.length; i++) {
+       stemp = data[i][collum_number]
+       //Logger.log(stemp.length)
+       
+       // check it is the last filled line for this collumn
+       if (stemp.length == 0.0) {
+       break
+       }
+       target_variable.push(stemp)
+       //Logger.log(target_variable)
+     }      
+  return target_variable
+}
+
+// function to handle one variable case
+function one_dimention(data) {
+      var dimention1 = []
+      
+      // extract data from the first dimension
+      dimention1 = extract_collum(data, 0)
+      Logger.log(dimention1)
+      //extract the name of the variavle
+      const dimension_name = data[0][0]
+      Logger.log(dimension_name )
+      
+      // create import sheet with headers
+      var import_sheet = create_import_sheet() 
+      
+      // loop to write data for all elements the dimension
+      var i;
+      for (i = 0; i < dimention1.length; i++) {
+        line_count = get_line_count(import_sheet) 
+        
+        Logger.log("line count is")
+        Logger.log("line_count")
+        dimention_value = dimention1[i]
+        
+        // set Ad_group name (column b)
+        cell_index_stemp = "B" + String(line_count + 1)
+        import_sheet.getRange(cell_index_stemp).setValue(dimention_value)
+        cell_index_stemp = "B" + String(line_count + 2)
+        import_sheet.getRange(cell_index_stemp).setValue(dimention_value)
+        cell_index_stemp = "B" + String(line_count + 3)
+        import_sheet.getRange(cell_index_stemp).setValue(dimention_value)
+        
+        //set Product Group
+        cell_index_stemp = "C" + String(line_count + 1)
+        import_sheet.getRange(cell_index_stemp).setValue("* / " + dimension_name + "='" + dimention_value + "'")
+        cell_index_stemp = "C" + String(line_count + 2)
+        import_sheet.getRange(cell_index_stemp).setValue("* /")
+        cell_index_stemp = "C" + String(line_count + 3)
+        import_sheet.getRange(cell_index_stemp).setValue("* / " + dimension_name + "=*")
+        
+        //set Product Group type
+        cell_index_stemp = "E" + String(line_count + 1)
+        import_sheet.getRange(cell_index_stemp).setValue("Biddable")
+        cell_index_stemp = "E" + String(line_count + 2)
+        import_sheet.getRange(cell_index_stemp).setValue("Subdivision")
+        cell_index_stemp = "E" + String(line_count + 3)
+        import_sheet.getRange(cell_index_stemp).setValue("Excluded")
+  
+        
+      }
+      
+      
+}
+
+
+// function to handle two variable case
+function two_dimention(data){
+  var dimention1 = []
+  var dimention2 = []
+  
+  // extract data from the 2 dimensions
+  dimention1 = extract_collum(data, 0)
+  Logger.log(dimention1)
+  dimention2 = extract_collum(data, 1)
+  Logger.log(dimention2)
+  
+   //extract the name of the variavle
+   const dimension1_name = data[0][0]
+   Logger.log(dimension1_name )
+   const dimension2_name = data[0][1]
+   Logger.log(dimension2_name )  
+  
+   // create import sheet with headers
+  import_sheet = create_import_sheet() 
+  
+   // loop to write data for all elements the dimension
+   var i;
+   for (i = 0; i < dimention1.length; i++) {
+        line_count = get_line_count(import_sheet) 
+        
+        Logger.log("line count is")
+        Logger.log("line_count")
+        dimention1_value = dimention1[i]
+        
+        
+        // create the subdicvision
+        cell_index_stemp = "C" + String(line_count + 1)
+        import_sheet.getRange(cell_index_stemp).setValue("* /" )        
+        cell_index_stemp = "C" + String(line_count + 2)
+        import_sheet.getRange(cell_index_stemp).setValue("* / " +dimension1_name + "='"+ dimention1_value + "' /" )        
+
+        
+        // loop to fill in the Product Group type
+        var y
+        for (y = 0; y < dimention2.length; y++) {
+          line_count_L2 = get_line_count(import_sheet) 
+          dimention2_value = dimention2[y]
+          
+          cell_index_stemp = "C" + String(line_count_L2 + 1)
+          import_sheet.getRange(cell_index_stemp).setValue("* / " + dimension1_name + "='" + dimention1_value + "' / "+ dimension2_name + "='" + dimention2_value + "'"  )      
+          
+                   
+        }
+        // add the garbage collector
+        line_count_L2 = get_line_count(import_sheet) 
+        cell_index_stemp = "C" + String(line_count_L2 + 1)
+        import_sheet.getRange(cell_index_stemp).setValue("* / " + dimension1_name + "='"+dimention1_value+"' / " +  dimension2_name + "=*")
+        cell_index_stemp = "C" + String(line_count_L2 + 2)
+        import_sheet.getRange(cell_index_stemp).setValue("* / " + dimension1_name + "=*")
+        
+        //set Product Group type
+        cell_index_stemp = "E" + String(line_count + 1)
+        import_sheet.getRange(cell_index_stemp).setValue("Subdivision")
+        cell_index_stemp = "E" + String(line_count + 2)
+        import_sheet.getRange(cell_index_stemp).setValue("Subdivision")
+        
+        // add bidable for all created lines
+        for (y = line_count + 3; y < line_count_L2 + 2 ; y++) {
+        cell_index_stemp = "E" + String(y)
+        import_sheet.getRange(cell_index_stemp).setValue("Biddable")  
+        }
+     
+        // add non excluded for garbage collector
+        cell_index_stemp = "E" + String(line_count_L2 + 2)
+        import_sheet.getRange(cell_index_stemp).setValue("Excluded")
+     
+     
+        // loop to ad the ad group name
+        for (y = line_count + 1; y < line_count_L2 +3 ; y++) {
+        
+        cell_index_stemp = "B" + String(y)
+        import_sheet.getRange(cell_index_stemp).setValue(dimention1_value)
+        
+        }
+
+      }
+  
+}
+
+
+
+function three_dimention(data){
+     var dimention1 = []
+     var dimention2 = []
+     var dimention3 = [] 
+    // extract data from the 2 dimensions
+     dimention1 = extract_collum(data, 0)
+     Logger.log(dimention1)
+     dimention2 = extract_collum(data, 1)
+     Logger.log(dimention2)
+     dimention3 = extract_collum(data, 2)
+     Logger.log(dimention3)
+     
+     
+     
+  
+   //extract the name of the variavle
+   const dimension1_name = data[0][0]
+   Logger.log(dimension1_name )
+   const dimension2_name = data[0][1]
+   Logger.log(dimension2_name )  
+   const dimension3_name = data[0][1]
+   Logger.log(dimension3_name )  
+   
+  
+   // create import sheet with headers
+   import_sheet = create_import_sheet() 
+  
+   // loop to write data for all elements the dimension
+   var i;
+   for (i = 0; i < dimention1.length; i++) {
+        //line_count = get_line_count(import_sheet) 
+        
+        Logger.log("line count is")
+        Logger.log("line_count")
+        dimention1_value = dimention1[i]
+        
+        
+    
+
+        
+        // loop to fill in the Product Group type
+        var y
+        for (y = 0; y < dimention2.length; y++) {
+          line_count_L2 = get_line_count(import_sheet) 
+          dimention2_value = dimention2[y]
+          
+          // create the subdicvision
+          cell_index_stemp = "C" + String(line_count_L2 + 1)
+          import_sheet.getRange(cell_index_stemp).setValue("* /" )        
+          cell_index_stemp = "C" + String(line_count_L2 + 2)
+          import_sheet.getRange(cell_index_stemp).setValue("* / " +dimension1_name + "='"+ dimention1_value + "' /" )  
+                    
+          cell_index_stemp = "E" + String(line_count_L2 + 1)
+          import_sheet.getRange(cell_index_stemp).setValue("Subdivision")
+          cell_index_stemp = "E" + String(line_count_L2 + 2)
+          import_sheet.getRange(cell_index_stemp).setValue("Subdivision")
+          
+          
+          // create 3rd level subdivision
+          cell_index_stemp = "C" + String(line_count_L2 + 3)
+          import_sheet.getRange(cell_index_stemp).setValue("* / " + dimension1_name + "='" + dimention1_value + "' / "+ dimension2_name + "='" + dimention2_value + "' /"  )    
+          
+          cell_index_stemp = "E" + String(line_count_L2 + 3)
+          import_sheet.getRange(cell_index_stemp).setValue("Subdivision")
+          
+          // loop to fill the 3rd level product Group type
+          var z
+          for (z = 0; z < dimention3.length; z++) {
+            dimention3_value = dimention3[z]
+            line_count_L3 = get_line_count(import_sheet)
+            
+           
+            cell_index_stemp = "C" + String(line_count_L3 + 1)
+            import_sheet.getRange(cell_index_stemp).setValue("* / " + dimension1_name + "='" + dimention1_value + "' / "+ dimension2_name + "='" + dimention2_value + "' / " +  dimension3_name + "='" + dimention3_value + "'"  )      
+            }
+          // add the garbage collector
+          line_count_L3_end = get_line_count(import_sheet) 
+          cell_index_stemp = "C" + String(line_count_L3_end + 1)
+          import_sheet.getRange(cell_index_stemp).setValue("*/ " + dimension1_name + "='"+dimention1_value+"' / " +  dimension2_name + dimention2_value + "' / " + dimension3_name +  "=*")
+          
+          for (z = line_count_L2 + 4; z < line_count_L3_end + 2 ; z++) {
+            cell_index_stemp = "E" + String(z)
+            import_sheet.getRange(cell_index_stemp).setValue("Biddable")  
+          }
+          
+          // add exlusion
+          cell_index_stemp = "C" + String(line_count_L3_end + 2)
+          import_sheet.getRange(cell_index_stemp).setValue("* / " + dimension1_name + "='"+dimention1_value+"' / " +  dimension2_name   + "=*")
+          cell_index_stemp = "E" + String(line_count_L3_end + 2)
+          import_sheet.getRange(cell_index_stemp).setValue("Excluded")
+          
+          cell_index_stemp = "C" + String(line_count_L3_end + 3)
+          import_sheet.getRange(cell_index_stemp).setValue("* / " + dimension1_name + "=*")      
+          cell_index_stemp = "E" + String(line_count_L3_end + 3)
+          import_sheet.getRange(cell_index_stemp).setValue("Excluded")
+          
+          // loop to ad the ad group name
+          Ad_group_name = dimention1_value+ "_" + dimention2_value
+          for (z = line_count_L2 + 1 ; z < line_count_L3_end + 4 ; z++) {
+        
+            cell_index_stemp = "B" + String(z)
+            import_sheet.getRange(cell_index_stemp).setValue(Ad_group_name)
+        
+          }
+          
+        }
+                   
+        }
+     
+     
+
+
+      
+}
