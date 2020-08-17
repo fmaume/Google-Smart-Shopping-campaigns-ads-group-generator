@@ -1,0 +1,50 @@
+#edit line 3 & 6
+
+feed = "https://feeds.mergado.com/radiators-shop-google-nakupy-fc682e7b905babe86f3892c3f7c2b67a.xml"
+
+#Enter the file path to save the result
+out_path = "G:\\Dropbox\\xml_feed_attribute.xlsx"
+
+
+#request the feed and parsen it
+from bs4 import BeautifulSoup
+import requests
+r = requests.get(feed)
+soup = BeautifulSoup(r.content, 'xml')
+
+
+
+#get all the items
+item_list = soup.findAll("item")
+
+#genrate list of atribute based on the 10 first items.
+Atribute_list = list()
+for item in item_list[0:10]:
+    stemp = item.findChildren()
+    [Atribute_list.append(x.name) for x in stemp]
+    
+Atribute_list = list(set(Atribute_list))
+
+
+#generate the list of avialable atribute
+Result_dic = {}
+
+for atribute in Atribute_list:
+    stemp = soup.findAll(atribute)
+    option_list = list()
+    [option_list.append(x.text) for x in stemp]
+    option_list = list(set(option_list))
+    Result_dic[atribute] = option_list
+
+#generate export file    
+import pandas as pd
+export = pd.DataFrame({"init": ["This automation was sponsored by https://www.smartlook.com/"]})
+
+for atribute in Atribute_list:
+    stemp = pd.DataFrame({atribute: Result_dic[atribute]})
+    export = pd.concat([export, stemp],  axis=1)
+
+
+writer = pd.ExcelWriter(out_path, engine='xlsxwriter')            
+export.to_excel(writer,   header=True, index=False ) 
+writer.close()
